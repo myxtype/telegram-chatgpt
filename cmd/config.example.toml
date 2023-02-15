@@ -1,0 +1,11 @@
+[Bot]
+Token = ""
+
+[ChatGPT]
+ApiKey = ""
+MaxTokens = 1024
+Temperature = 0.9
+
+[Session]
+TokensLimit = 1024
+Exp = 10
