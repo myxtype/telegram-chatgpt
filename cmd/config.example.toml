@@ -9,3 +9,7 @@ Temperature = 0.9
 [Session]
 TokensLimit = 1024
 Exp = 10
+
+[Limiter]
+Tokens = 3
+Interval = 1

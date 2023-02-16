@@ -24,10 +24,8 @@ func Start() {
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	limiter, err := memorystore.New(&memorystore.Config{
-		// Number of tokens allowed per interval.
-		Tokens: 1,
-		// Interval until tokens reset.
-		Interval: time.Second * 30,
+		Tokens:   conf.Config().Limiter.Tokens,
+		Interval: time.Minute * conf.Config().Limiter.Interval,
 	})
 	if err != nil {
 		log.Panic(err)
@@ -65,7 +63,11 @@ func Start() {
 				text = strings.ReplaceAll(update.Message.Text, atBotText, "")
 			}
 
-			_, _, rest, ok, _ := limiter.Take(context.Background(), update.Message.From.UserName)
+			_, _, rest, ok, err := limiter.Take(context.Background(), update.Message.From.UserName)
+			if err != nil {
+				log.Printf("limiter error %s", err.Error())
+				continue
+			}
 
 			if !ok {
 				sub := time.UnixMicro(int64(rest / 1000)).Sub(time.Now())
@@ -78,7 +80,7 @@ func Start() {
 
 			reply, err := gpt.Completions(update.Message.From.UserName, strings.TrimSpace(text))
 			if err != nil {
-				log.Printf("%s", err.Error())
+				log.Printf("gpt completions error %s", err.Error())
 				continue
 			}
 

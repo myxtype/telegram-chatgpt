@@ -6,6 +6,7 @@ type GbeConfig struct {
 	Bot     botConfig
 	Session sessionConfig
 	ChatGPT chatGPTConfig
+	Limiter limiterConfig
 }
 
 type botConfig struct {
@@ -21,4 +22,9 @@ type chatGPTConfig struct {
 	ApiKey      string
 	MaxTokens   int
 	Temperature float32
+}
+
+type limiterConfig struct {
+	Tokens   uint64
+	Interval time.Duration
 }
