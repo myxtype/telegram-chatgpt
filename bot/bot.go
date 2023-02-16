@@ -79,16 +79,28 @@ func Start() {
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID,
 					fmt.Sprintf("限制每%d分钟%d次请求(剩余%v秒)", conf.Config().Limiter.Interval, conf.Config().Limiter.Tokens, sub.Seconds()),
 				)
-				msg.ReplyToMessageID = update.Message.MessageID
+				if !update.Message.Chat.IsPrivate() {
+					msg.ReplyToMessageID = update.Message.MessageID
+				}
 
-				// clear waring msg
-				rmsg, err := bot.Send(msg)
+				replyMsg, err := bot.Send(msg)
 				if err == nil {
 					time.AfterFunc(sub, func() {
-						bot.Send(tgbotapi.NewDeleteMessage(rmsg.Chat.ID, rmsg.MessageID))
+						bot.Send(tgbotapi.NewDeleteMessage(replyMsg.Chat.ID, replyMsg.MessageID))
 					})
 				}
 
+				continue
+			}
+
+			// 思考
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "正在思考......")
+			if !update.Message.Chat.IsPrivate() {
+				msg.ReplyToMessageID = update.Message.MessageID
+			}
+
+			replyMsg, err := bot.Send(msg)
+			if err != nil {
 				continue
 			}
 
@@ -96,14 +108,14 @@ func Start() {
 			reply, err := gpt.Completions(update.Message.From.UserName, strings.TrimSpace(text))
 			if err != nil {
 				log.Printf("gpt completions error %s", err.Error())
+				bot.Send(tgbotapi.NewEditMessageText(replyMsg.Chat.ID, replyMsg.MessageID, err.Error()))
 				continue
 			}
 
 			if reply != "" {
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, reply)
-				msg.ReplyToMessageID = update.Message.MessageID
-
-				bot.Send(msg)
+				bot.Send(tgbotapi.NewEditMessageText(replyMsg.Chat.ID, replyMsg.MessageID, reply))
+			} else {
+				bot.Send(tgbotapi.NewEditMessageText(replyMsg.Chat.ID, replyMsg.MessageID, "没有得到任何消息！"))
 			}
 		}
 	}

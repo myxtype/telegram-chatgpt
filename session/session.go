@@ -1,13 +1,13 @@
 package session
 
 import (
-	"sync"
+	"github.com/golang/groupcache/lru"
 	"telegram-chatgpt/conf"
 	"time"
 	"unicode/utf8"
 )
 
-var sessions = sync.Map{}
+var sessions = lru.New(1024)
 
 type session struct {
 	records  []*record
@@ -59,13 +59,13 @@ func SaveMsg(user, msg, reply string) {
 }
 
 func ClearSession(user string) {
-	sessions.Delete(user)
+	sessions.Remove(user)
 }
 
 func getSession(user string) *session {
 	var sess *session
 
-	v, fond := sessions.Load(user)
+	v, fond := sessions.Get(user)
 	if fond {
 		sess = v.(*session)
 	} else {
@@ -73,7 +73,7 @@ func getSession(user string) *session {
 			records:  []*record{},
 			lastTime: time.Now(),
 		}
-		sessions.Store(user, sess)
+		sessions.Add(user, sess)
 	}
 
 	// exp
