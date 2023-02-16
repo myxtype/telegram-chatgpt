@@ -67,6 +67,7 @@ func Start() {
 				text = strings.ReplaceAll(update.Message.Text, atBotText, "")
 			}
 
+			// limier take
 			_, _, rest, ok, err := limiter.Take(context.Background(), update.Message.From.UserName)
 			if err != nil {
 				log.Printf("limiter error %s", err.Error())
@@ -75,13 +76,23 @@ func Start() {
 
 			if !ok {
 				sub := time.UnixMicro(int64(rest / 1000)).Sub(time.Now())
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, fmt.Sprintf("🐢(%vs)", int64(sub.Seconds())))
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID,
+					fmt.Sprintf("限制每%d分钟%d次请求(剩余%v秒)", conf.Config().Limiter.Interval, conf.Config().Limiter.Tokens, sub.Seconds()),
+				)
 				msg.ReplyToMessageID = update.Message.MessageID
 
-				bot.Send(msg)
+				// clear waring msg
+				rmsg, err := bot.Send(msg)
+				if err == nil {
+					time.AfterFunc(sub, func() {
+						bot.Send(tgbotapi.NewDeleteMessage(rmsg.Chat.ID, rmsg.MessageID))
+					})
+				}
+
 				continue
 			}
 
+			// call ChatGPT
 			reply, err := gpt.Completions(update.Message.From.UserName, strings.TrimSpace(text))
 			if err != nil {
 				log.Printf("gpt completions error %s", err.Error())
