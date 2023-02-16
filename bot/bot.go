@@ -43,6 +43,10 @@ func Start() {
 			if update.Message.IsCommand() {
 				if update.Message.Command() == "clear" {
 					session.ClearSession(update.Message.From.UserName)
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "session cleared")
+					msg.ReplyToMessageID = update.Message.MessageID
+
+					bot.Send(msg)
 				}
 				continue
 			}
