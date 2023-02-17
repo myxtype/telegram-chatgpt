@@ -5,6 +5,7 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sethvargo/go-limiter/memorystore"
+	"github.com/spf13/cast"
 	"log"
 	"strings"
 	"telegram-chatgpt/conf"
@@ -57,7 +58,7 @@ func Start() {
 			}
 
 			// Limier take
-			_, _, rest, ok, err := limiter.Take(context.Background(), update.Message.From.UserName)
+			_, _, rest, ok, err := limiter.Take(context.Background(), cast.ToString(update.Message.From.ID))
 			if err != nil {
 				log.Printf("limiter error %s", err.Error())
 				continue
