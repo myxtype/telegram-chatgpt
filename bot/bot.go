@@ -42,7 +42,7 @@ func Start() {
 			if update.Message.IsCommand() {
 				switch update.Message.Command() {
 				case "clear":
-					gpt.ClearSession(update.Message.From.UserName)
+					gpt.ClearSession(update.Message.From.ID)
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, conf.Config().Bot.SessionClearText)
 					msg.ReplyToMessageID = update.Message.MessageID
 
@@ -102,7 +102,7 @@ func Start() {
 
 			// ReplyToMessage
 			if update.Message.ReplyToMessage != nil && update.Message.ReplyToMessage.Text != conf.Config().Bot.SessionClearText {
-				if gpt.GetSessionRecordsCount(update.Message.From.UserName) == 0 {
+				if gpt.GetSessionRecordsCount(update.Message.From.ID) == 0 {
 					text = update.Message.ReplyToMessage.Text + "\n" + text
 				}
 			}
@@ -119,7 +119,7 @@ func Start() {
 			}
 
 			// call ChatGPT
-			reply, err := gpt.Completions(update.Message.From.UserName, strings.TrimSpace(text))
+			reply, err := gpt.Completions(update.Message.From.ID, strings.TrimSpace(text))
 			if err != nil {
 				log.Printf("gpt completions error %s", err.Error())
 				bot.Send(tgbotapi.NewEditMessageText(thinkMsg.Chat.ID, thinkMsg.MessageID, err.Error()))

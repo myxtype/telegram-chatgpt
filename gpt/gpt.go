@@ -3,6 +3,7 @@ package gpt
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/spf13/cast"
 	"io"
 	"log"
 	"net/http"
@@ -31,7 +32,7 @@ type ChatGPTRequestBody struct {
 	User             string  `json:"user"`
 }
 
-func Completions(user, msg string) (string, error) {
+func Completions(user interface{}, msg string) (string, error) {
 	requestBody := ChatGPTRequestBody{
 		Model:            "text-davinci-003",
 		Prompt:           GetPrompt(user, msg),
@@ -40,7 +41,7 @@ func Completions(user, msg string) (string, error) {
 		TopP:             1,
 		FrequencyPenalty: 0,
 		PresencePenalty:  0,
-		User:             user,
+		User:             cast.ToString(user),
 	}
 	requestData, err := json.Marshal(requestBody)
 	if err != nil {

@@ -28,7 +28,7 @@ func newRecord(q, a string) *record {
 	}
 }
 
-func GetPrompt(user, msg string) string {
+func GetPrompt(user interface{}, msg string) string {
 	var sm string
 
 	sess := getSession(user)
@@ -41,7 +41,7 @@ func GetPrompt(user, msg string) string {
 	return sm
 }
 
-func SaveMsg(user, msg, reply string) {
+func SaveMsg(user interface{}, msg, reply string) {
 	s := getSession(user)
 	s.records = append(s.records, newRecord(msg, reply))
 
@@ -58,16 +58,16 @@ func SaveMsg(user, msg, reply string) {
 	}
 }
 
-func GetSessionRecordsCount(user string) int {
+func GetSessionRecordsCount(user interface{}) int {
 	sess := getSession(user)
 	return len(sess.records)
 }
 
-func ClearSession(user string) {
+func ClearSession(user interface{}) {
 	sessions.Remove(user)
 }
 
-func getSession(user string) *session {
+func getSession(user interface{}) *session {
 	var sess *session
 
 	v, fond := sessions.Get(user)
