@@ -58,6 +58,11 @@ func SaveMsg(user, msg, reply string) {
 	}
 }
 
+func GetSessionRecordsCount(user string) int {
+	sess := getSession(user)
+	return len(sess.records)
+}
+
 func ClearSession(user string) {
 	sessions.Remove(user)
 }

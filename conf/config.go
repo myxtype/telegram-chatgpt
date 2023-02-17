@@ -15,6 +15,7 @@ type botConfig struct {
 	HelloText        string
 	SessionClearText string
 	LimiterText      string
+	ThinkingText     string
 }
 
 type sessionConfig struct {

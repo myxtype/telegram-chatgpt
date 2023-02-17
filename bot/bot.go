@@ -57,24 +57,6 @@ func Start() {
 				continue
 			}
 
-			var text string
-
-			if update.Message.Chat.IsPrivate() {
-				text = update.Message.Text
-			} else if update.Message.ReplyToMessage != nil && update.Message.ReplyToMessage.From.UserName == bot.Self.UserName {
-				text = update.Message.Text
-			} else if strings.Index(update.Message.Text, "/") == 0 {
-				text = strings.Replace(update.Message.Text, "/", "", 1)
-			} else {
-				atBotText := fmt.Sprintf("@%s", bot.Self.UserName)
-
-				if strings.Index(update.Message.Text, atBotText) < 0 {
-					continue
-				}
-
-				text = strings.ReplaceAll(update.Message.Text, atBotText, "")
-			}
-
 			// Limier take
 			_, _, rest, ok, err := limiter.Take(context.Background(), update.Message.From.UserName)
 			if err != nil {
@@ -101,13 +83,38 @@ func Start() {
 				continue
 			}
 
-			// 思考
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "正在思考......")
+			var text string
+
+			if update.Message.Chat.IsPrivate() {
+				text = update.Message.Text
+			} else if update.Message.ReplyToMessage != nil && update.Message.ReplyToMessage.From.UserName == bot.Self.UserName {
+				text = update.Message.Text
+			} else if strings.Index(update.Message.Text, "/") == 0 {
+				text = strings.Replace(update.Message.Text, "/", "", 1)
+			} else {
+				atBotText := fmt.Sprintf("@%s", bot.Self.UserName)
+
+				if strings.Index(update.Message.Text, atBotText) < 0 {
+					continue
+				}
+
+				text = strings.ReplaceAll(update.Message.Text, atBotText, "")
+			}
+
+			// ReplyToMessage
+			if update.Message.ReplyToMessage != nil {
+				if session.GetSessionRecordsCount(update.Message.From.UserName) == 0 {
+					text = update.Message.ReplyToMessage.Text + "\n" + text
+				}
+			}
+
+			// Thinking
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, conf.Config().Bot.ThinkingText)
 			if !update.Message.Chat.IsPrivate() {
 				msg.ReplyToMessageID = update.Message.MessageID
 			}
 
-			replyMsg, err := bot.Send(msg)
+			thinkMsg, err := bot.Send(msg)
 			if err != nil {
 				continue
 			}
@@ -116,14 +123,14 @@ func Start() {
 			reply, err := gpt.Completions(update.Message.From.UserName, strings.TrimSpace(text))
 			if err != nil {
 				log.Printf("gpt completions error %s", err.Error())
-				bot.Send(tgbotapi.NewEditMessageText(replyMsg.Chat.ID, replyMsg.MessageID, err.Error()))
+				bot.Send(tgbotapi.NewEditMessageText(thinkMsg.Chat.ID, thinkMsg.MessageID, err.Error()))
 				continue
 			}
 
 			if reply != "" {
-				bot.Send(tgbotapi.NewEditMessageText(replyMsg.Chat.ID, replyMsg.MessageID, reply))
+				bot.Send(tgbotapi.NewEditMessageText(thinkMsg.Chat.ID, thinkMsg.MessageID, reply))
 			} else {
-				bot.Send(tgbotapi.NewEditMessageText(replyMsg.Chat.ID, replyMsg.MessageID, "没有得到任何消息！"))
+				bot.Send(tgbotapi.NewEditMessageText(thinkMsg.Chat.ID, thinkMsg.MessageID, "没有得到任何消息！"))
 			}
 		}
 	}
