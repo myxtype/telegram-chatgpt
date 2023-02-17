@@ -44,12 +44,12 @@ func Start() {
 				switch update.Message.Command() {
 				case "clear":
 					session.ClearSession(update.Message.From.UserName)
-					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "会话已清除")
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, conf.Config().Bot.SessionClearText)
 					msg.ReplyToMessageID = update.Message.MessageID
 
 					bot.Send(msg)
 				case "start":
-					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "欢迎使用！\n1.@我、消息前加'/'或者直接回复我的消息，即可向我提问\n2.会话清除：发送/clear给我即可清除会话")
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, conf.Config().Bot.HelloText)
 					msg.ReplyToMessageID = update.Message.MessageID
 
 					bot.Send(msg)
@@ -85,7 +85,7 @@ func Start() {
 			if !ok {
 				sub := time.UnixMicro(int64(rest / 1000)).Sub(time.Now())
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID,
-					fmt.Sprintf("限制每%d分钟%d次请求(剩余%v秒)", conf.Config().Limiter.Interval, conf.Config().Limiter.Tokens, sub.Seconds()),
+					fmt.Sprintf(conf.Config().Bot.LimiterText, sub.Seconds()),
 				)
 				if !update.Message.Chat.IsPrivate() {
 					msg.ReplyToMessageID = update.Message.MessageID

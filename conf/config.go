@@ -11,6 +11,10 @@ type GbeConfig struct {
 
 type botConfig struct {
 	Token string
+
+	HelloText        string
+	SessionClearText string
+	LimiterText      string
 }
 
 type sessionConfig struct {
