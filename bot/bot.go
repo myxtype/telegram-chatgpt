@@ -37,13 +37,19 @@ func Start() {
 	updates := bot.GetUpdatesChan(u)
 
 	for update := range updates {
-		if update.Message != nil { // If we got a message
+		if update.Message != nil {
 			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
 			if update.Message.IsCommand() {
-				if update.Message.Command() == "clear" {
+				switch update.Message.Command() {
+				case "clear":
 					session.ClearSession(update.Message.From.UserName)
-					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "session cleared")
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "会话已清除")
+					msg.ReplyToMessageID = update.Message.MessageID
+
+					bot.Send(msg)
+				case "start":
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "欢迎使用！\n1.@我、消息前加'/'或者直接回复我的消息，即可向我提问\n2.会话清除：发送/clear给我即可清除会话")
 					msg.ReplyToMessageID = update.Message.MessageID
 
 					bot.Send(msg)
@@ -57,6 +63,8 @@ func Start() {
 				text = update.Message.Text
 			} else if update.Message.ReplyToMessage != nil && update.Message.ReplyToMessage.From.UserName == bot.Self.UserName {
 				text = update.Message.Text
+			} else if strings.Index(update.Message.Text, "/") == 0 {
+				text = strings.Replace(update.Message.Text, "/", "", 1)
 			} else {
 				atBotText := fmt.Sprintf("@%s", bot.Self.UserName)
 
@@ -67,7 +75,7 @@ func Start() {
 				text = strings.ReplaceAll(update.Message.Text, atBotText, "")
 			}
 
-			// limier take
+			// Limier take
 			_, _, rest, ok, err := limiter.Take(context.Background(), update.Message.From.UserName)
 			if err != nil {
 				log.Printf("limiter error %s", err.Error())

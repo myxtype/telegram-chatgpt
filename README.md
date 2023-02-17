@@ -1,7 +1,9 @@
 # telegram-chatgpt
+
 使用ChatGPT接口来建立一个可限速控制的电报机器人。
 
-# config
+# 配置
+
 复制`config.example.toml`为`config.toml`，然后进行以下配置。
 
 ```toml
@@ -23,13 +25,16 @@ Interval = 1 # 限速周期，分钟。这里填写1表示1分钟内可以发送
 ```
 
 # 运行
+
 执行`sh build.sh`来编译，或者`cd bot && go build`进行编译。
 
 然后执行`./bot/bot`运行机器人，注意当前目录需要有`config.toml`配置文件。
 
 # 说明
-- @机器人 或者 回复机器人的消息，即可向机器人提问
-- 会话清除：发送`/clear`给机器人即可记录清除会话
+
+- @机器人、消息前加'/'或者回复机器人的消息，即可向机器人提问
+- 会话清除：发送`/clear`给机器人即可清除会话
 
 # 示例
+
 https://t.me/botaigpt_bot
