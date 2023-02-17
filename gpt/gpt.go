@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"telegram-chatgpt/conf"
-	"telegram-chatgpt/session"
 )
 
 const BASEURL = "https://api.openai.com"
@@ -35,7 +34,7 @@ type ChatGPTRequestBody struct {
 func Completions(user, msg string) (string, error) {
 	requestBody := ChatGPTRequestBody{
 		Model:            "text-davinci-003",
-		Prompt:           session.GetPrompt(user, msg),
+		Prompt:           GetPrompt(user, msg),
 		MaxTokens:        conf.Config().ChatGPT.MaxTokens,
 		Temperature:      conf.Config().ChatGPT.Temperature,
 		TopP:             1,
@@ -85,7 +84,7 @@ func Completions(user, msg string) (string, error) {
 	}
 
 	if reply != "" {
-		session.SaveMsg(user, msg, reply)
+		SaveMsg(user, msg, reply)
 	}
 	log.Printf("gpt response text: %s \n", reply)
 	return reply, nil

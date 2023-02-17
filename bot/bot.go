@@ -9,7 +9,6 @@ import (
 	"strings"
 	"telegram-chatgpt/conf"
 	"telegram-chatgpt/gpt"
-	"telegram-chatgpt/session"
 	"time"
 )
 
@@ -43,7 +42,7 @@ func Start() {
 			if update.Message.IsCommand() {
 				switch update.Message.Command() {
 				case "clear":
-					session.ClearSession(update.Message.From.UserName)
+					gpt.ClearSession(update.Message.From.UserName)
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, conf.Config().Bot.SessionClearText)
 					msg.ReplyToMessageID = update.Message.MessageID
 
@@ -67,7 +66,7 @@ func Start() {
 			if !ok {
 				sub := time.UnixMicro(int64(rest / 1000)).Sub(time.Now())
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID,
-					fmt.Sprintf(conf.Config().Bot.LimiterText, sub.Seconds()),
+					fmt.Sprintf(conf.Config().Bot.LimiterText, int(sub.Seconds())),
 				)
 				if !update.Message.Chat.IsPrivate() {
 					msg.ReplyToMessageID = update.Message.MessageID
@@ -102,8 +101,8 @@ func Start() {
 			}
 
 			// ReplyToMessage
-			if update.Message.ReplyToMessage != nil {
-				if session.GetSessionRecordsCount(update.Message.From.UserName) == 0 {
+			if update.Message.ReplyToMessage != nil && update.Message.ReplyToMessage.Text != conf.Config().Bot.SessionClearText {
+				if gpt.GetSessionRecordsCount(update.Message.From.UserName) == 0 {
 					text = update.Message.ReplyToMessage.Text + "\n" + text
 				}
 			}

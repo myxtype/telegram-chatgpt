@@ -1,4 +1,4 @@
-package session
+package gpt
 
 import (
 	"github.com/golang/groupcache/lru"
