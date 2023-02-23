@@ -1,5 +1,7 @@
 package bing
 
+const baseUri = ""
+
 type ChatBing struct {
 }
 
