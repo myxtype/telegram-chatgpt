@@ -32,7 +32,7 @@ type ChatGPTRequestBody struct {
 	User             string  `json:"user"`
 }
 
-func Completions(user interface{}, msg string) (string, error) {
+func Completions(user int64, msg string) (string, error) {
 	requestBody := ChatGPTRequestBody{
 		Model:            "text-davinci-003",
 		Prompt:           GetPrompt(user, msg),
