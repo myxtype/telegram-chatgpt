@@ -1,13 +1,14 @@
 package gpt
 
 import (
-	"github.com/golang/groupcache/lru"
+	"github.com/patrickmn/go-cache"
+	"github.com/spf13/cast"
 	"telegram-chatgpt/conf"
 	"time"
 	"unicode/utf8"
 )
 
-var sessions = lru.New(1024)
+var sessions = cache.New(5*time.Minute, 10*time.Minute)
 
 type session struct {
 	records  []*record
@@ -64,13 +65,13 @@ func GetSessionRecordsCount(user int64) int {
 }
 
 func ClearSession(user int64) {
-	sessions.Remove(user)
+	sessions.Delete(cast.ToString(user))
 }
 
 func getSession(user int64) *session {
 	var sess *session
 
-	v, fond := sessions.Get(user)
+	v, fond := sessions.Get(cast.ToString(user))
 	if fond {
 		sess = v.(*session)
 	} else {
@@ -78,10 +79,9 @@ func getSession(user int64) *session {
 			records:  []*record{},
 			lastTime: time.Now(),
 		}
-		sessions.Add(user, sess)
+		sessions.SetDefault(cast.ToString(user), sess)
 	}
 
-	// exp
 	if sess.lastTime.Before(time.Now().Add(-1 * conf.Config().Session.Exp * time.Minute)) {
 		sess.records = []*record{}
 	}
