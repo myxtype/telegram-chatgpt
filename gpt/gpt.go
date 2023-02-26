@@ -12,6 +12,10 @@ import (
 
 const BASEURL = "https://api.openai.com"
 
+type ChatGPTResponseError struct {
+	Message string `json:"message"`
+}
+
 type ChatGPTResponseBody struct {
 	ID      string                   `json:"id"`
 	Object  string                   `json:"object"`
@@ -19,6 +23,7 @@ type ChatGPTResponseBody struct {
 	Model   string                   `json:"model"`
 	Choices []map[string]interface{} `json:"choices"`
 	Usage   map[string]interface{}   `json:"usage"`
+	Error   *ChatGPTResponseError    `json:"error,omitempty"`
 }
 
 type ChatGPTRequestBody struct {
@@ -74,6 +79,10 @@ func Completions(user int64, msg string) (string, error) {
 	err = json.Unmarshal(body, gptResponseBody)
 	if err != nil {
 		return "", err
+	}
+
+	if gptResponseBody.Error != nil {
+		return gptResponseBody.Error.Message, nil
 	}
 
 	var reply string

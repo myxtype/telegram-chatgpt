@@ -8,7 +8,7 @@ import (
 	"unicode/utf8"
 )
 
-var sessions = cache.New(5*time.Minute, 10*time.Minute)
+var sessions = cache.New(30*time.Minute, 10*time.Minute)
 
 type session struct {
 	records  []*record
