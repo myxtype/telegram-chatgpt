@@ -1,6 +1,6 @@
 # telegram-chatgpt
 
-使用ChatGPT接口来建立一个可限速控制的电报机器人。
+使用ChatGPT或者NewBing接口来建立一个可限速控制的电报机器人。
 
 # 配置
 
