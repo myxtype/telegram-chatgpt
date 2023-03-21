@@ -50,7 +50,7 @@ func GetSessionMessages(user int64, msg string) []*ChatGPTRequestMessage {
 		messages = append(messages,
 			&ChatGPTRequestMessage{
 				Role:    "user",
-				Content: r.q,
+				Content: r.a,
 			},
 			&ChatGPTRequestMessage{
 				Role:    "assistant",
