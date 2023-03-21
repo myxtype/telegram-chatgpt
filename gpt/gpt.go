@@ -26,21 +26,28 @@ type ChatGPTResponseBody struct {
 	Error   *ChatGPTResponseError    `json:"error,omitempty"`
 }
 
+type ChatGPTRequestMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
 type ChatGPTRequestBody struct {
 	Model            string  `json:"model"`
-	Prompt           string  `json:"prompt"`
 	MaxTokens        int     `json:"max_tokens"`
 	Temperature      float32 `json:"temperature"`
 	TopP             int     `json:"top_p"`
 	FrequencyPenalty int     `json:"frequency_penalty"`
 	PresencePenalty  int     `json:"presence_penalty"`
 	User             string  `json:"user"`
+
+	Messages []*ChatGPTRequestMessage `json:"messages,omitempty"`
+	Prompt   string                   `json:"prompt,omitempty"`
 }
 
 func Completions(user int64, msg string) (string, error) {
 	requestBody := ChatGPTRequestBody{
-		Model:            "text-davinci-003",
-		Prompt:           GetPrompt(user, msg),
+		Model:            "gpt-3.5-turbo",
+		Messages:         GetSessionMessages(user, msg),
 		MaxTokens:        conf.Config().ChatGPT.MaxTokens,
 		Temperature:      conf.Config().ChatGPT.Temperature,
 		TopP:             1,
@@ -94,7 +101,7 @@ func Completions(user int64, msg string) (string, error) {
 	}
 
 	if reply != "" {
-		SaveMsg(user, msg, reply)
+		SaveSessionMessage(user, msg, reply)
 	}
 	log.Printf("gpt response text: %s \n", reply)
 	return reply, nil

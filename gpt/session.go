@@ -10,29 +10,29 @@ import (
 
 var sessions = cache.New(30*time.Minute, 10*time.Minute)
 
-type session struct {
-	records  []*record
+type Session struct {
+	records  []*Record
 	lastTime time.Time
 }
 
-type record struct {
+type Record struct {
 	q     string
 	a     string
 	count int
 }
 
-func newRecord(q, a string) *record {
-	return &record{
+func NewRecord(q, a string) *Record {
+	return &Record{
 		q:     q,
 		a:     a,
 		count: utf8.RuneCountInString(q) + utf8.RuneCountInString(a),
 	}
 }
 
-func GetPrompt(user int64, msg string) string {
+func GetSessionPrompt(user int64, msg string) string {
 	var sm string
 
-	sess := getSession(user)
+	sess := GetSession(user)
 	for _, r := range sess.records {
 		sm += "Q:" + r.q + "\nA:" + r.a + "\n"
 	}
@@ -42,9 +42,33 @@ func GetPrompt(user int64, msg string) string {
 	return sm
 }
 
-func SaveMsg(user int64, msg, reply string) {
-	s := getSession(user)
-	s.records = append(s.records, newRecord(msg, reply))
+func GetSessionMessages(user int64, msg string) []*ChatGPTRequestMessage {
+	var messages []*ChatGPTRequestMessage
+
+	sess := GetSession(user)
+	for _, r := range sess.records {
+		messages = append(messages,
+			&ChatGPTRequestMessage{
+				Role:    "user",
+				Content: r.q,
+			},
+			&ChatGPTRequestMessage{
+				Role:    "assistant",
+				Content: r.q,
+			})
+	}
+
+	messages = append(messages, &ChatGPTRequestMessage{
+		Role:    "user",
+		Content: msg,
+	})
+
+	return messages
+}
+
+func SaveSessionMessage(user int64, msg, reply string) {
+	s := GetSession(user)
+	s.records = append(s.records, NewRecord(msg, reply))
 
 	var total int
 	for _, n := range s.records {
@@ -60,7 +84,7 @@ func SaveMsg(user int64, msg, reply string) {
 }
 
 func GetSessionRecordsCount(user int64) int {
-	sess := getSession(user)
+	sess := GetSession(user)
 	return len(sess.records)
 }
 
@@ -68,22 +92,22 @@ func ClearSession(user int64) {
 	sessions.Delete(cast.ToString(user))
 }
 
-func getSession(user int64) *session {
-	var sess *session
+func GetSession(user int64) *Session {
+	var sess *Session
 
 	v, fond := sessions.Get(cast.ToString(user))
 	if fond {
-		sess = v.(*session)
+		sess = v.(*Session)
 	} else {
-		sess = &session{
-			records:  []*record{},
+		sess = &Session{
+			records:  []*Record{},
 			lastTime: time.Now(),
 		}
 		sessions.SetDefault(cast.ToString(user), sess)
 	}
 
 	if sess.lastTime.Before(time.Now().Add(-1 * conf.Config().Session.Exp * time.Minute)) {
-		sess.records = []*record{}
+		sess.records = []*Record{}
 	}
 
 	return sess
