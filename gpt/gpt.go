@@ -61,7 +61,7 @@ func Completions(user int64, msg string) (string, error) {
 	}
 
 	log.Printf("request gtp json string : %v", string(requestData))
-	req, err := http.NewRequest("POST", BASEURL+"/v1/completions", bytes.NewBuffer(requestData))
+	req, err := http.NewRequest("POST", BASEURL+"/v1/chat/completions", bytes.NewBuffer(requestData))
 	if err != nil {
 		return "", err
 	}
