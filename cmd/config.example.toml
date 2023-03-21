@@ -6,6 +6,7 @@ LimiterText = "Limit 3 requests per 1 minute (%v seconds remaining)"
 ThinkingText = "Thinking..."
 
 [ChatGPT]
+Foreword = ""
 ApiKey = ""
 MaxTokens = 1024
 Temperature = 0.9
