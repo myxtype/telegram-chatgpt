@@ -27,6 +27,7 @@ type chatGPTConfig struct {
 	ApiKey      string
 	MaxTokens   int
 	Temperature float32
+	Foreword    string
 }
 
 type limiterConfig struct {

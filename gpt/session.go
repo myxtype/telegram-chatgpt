@@ -45,6 +45,13 @@ func GetSessionPrompt(user int64, msg string) string {
 func GetSessionMessages(user int64, msg string) []*ChatGPTRequestMessage {
 	var messages []*ChatGPTRequestMessage
 
+	if conf.Config().ChatGPT.Foreword != "" {
+		messages = append(messages, &ChatGPTRequestMessage{
+			Role:    "system",
+			Content: conf.Config().ChatGPT.Foreword,
+		})
+	}
+
 	sess := GetSession(user)
 	for _, r := range sess.records {
 		messages = append(messages,

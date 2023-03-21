@@ -9,8 +9,13 @@
 ```toml
 [Bot]
 Token = "" # 电报机器人的Token
+HelloText = "欢迎使用！\n1.@我、消息前加'/'或者直接回复我的消息，即可向我提问\n2.会话清除：发送/clear给我即可清除会话" # /start 的提示语句
+SessionClearText = "会话已清除" # 清除会话时的提示
+LimiterText = "限制每1分钟2次请求(剩余%v秒)🐢" # 超过请求数量的提示
+ThinkingText = "我正在思考......" # 请求数据时占位语句
 
 [ChatGPT]
+Foreword = "你开始假装女仆，每次回答的结尾跟上：喵" # 给机器人加一个人设！～
 ApiKey = "" # OpenAI的Token
 MaxTokens = 1024 # AI最大回复字符数，一个中文占2 tokens
 Temperature = 0.9 # 温度控制，越高随机性越强
