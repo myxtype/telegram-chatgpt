@@ -16,19 +16,23 @@ type ChatGPTResponseError struct {
 	Message string `json:"message"`
 }
 
-type ChatGPTResponseBody struct {
-	ID      string                   `json:"id"`
-	Object  string                   `json:"object"`
-	Created int                      `json:"created"`
-	Model   string                   `json:"model"`
-	Choices []map[string]interface{} `json:"choices"`
-	Usage   map[string]interface{}   `json:"usage"`
-	Error   *ChatGPTResponseError    `json:"error,omitempty"`
-}
-
-type ChatGPTRequestMessage struct {
+type ChatGPTMessage struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
+}
+
+type ChatGPTResponseMessage struct {
+	Message *ChatGPTMessage `json:"message"`
+}
+
+type ChatGPTResponseBody struct {
+	ID      string                    `json:"id"`
+	Object  string                    `json:"object"`
+	Created int                       `json:"created"`
+	Model   string                    `json:"model"`
+	Choices []*ChatGPTResponseMessage `json:"choices"`
+	Usage   map[string]interface{}    `json:"usage"`
+	Error   *ChatGPTResponseError     `json:"error,omitempty"`
 }
 
 type ChatGPTRequestBody struct {
@@ -40,8 +44,8 @@ type ChatGPTRequestBody struct {
 	PresencePenalty  int     `json:"presence_penalty"`
 	User             string  `json:"user"`
 
-	Messages []*ChatGPTRequestMessage `json:"messages,omitempty"`
-	Prompt   string                   `json:"prompt,omitempty"`
+	Messages []*ChatGPTMessage `json:"messages,omitempty"`
+	Prompt   string            `json:"prompt,omitempty"`
 }
 
 func Completions(user int64, msg string) (string, error) {
@@ -95,7 +99,7 @@ func Completions(user int64, msg string) (string, error) {
 	var reply string
 	if len(gptResponseBody.Choices) > 0 {
 		for _, v := range gptResponseBody.Choices {
-			reply = v["text"].(string)
+			reply = v.Message.Content
 			break
 		}
 	}
